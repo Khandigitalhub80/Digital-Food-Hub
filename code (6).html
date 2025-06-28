@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickMart - Instant Grocery Delivery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --secondary: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .header-shadow {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .cart-item-added {
+            animation: cartBounce 0.4s linear;
+        }
+        
+        @keyframes cartBounce {
+            0%, 100% { transform: scale(1); }
+            20% { transform: scale(1.2); }
+            40% { transform: scale(0.9); }
+            60% { transform: scale(1.1); }
+            80% { transform: scale(0.95); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .category-chip {
+            transition: all 0.2s ease;
+        }
+        
+        .category-chip:hover {
+            transform: scale(1.05);
+            background-color: #e6fffa;
+        }
+        
+        .cart-sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        #searchResults {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .delivery-time {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white sticky top-0 z-50 header-shadow">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/4f24b581-fb9a-44a8-8056-cb773b706f78.png" alt="QuickMart logo with green shopping bag icon" class="h-10">
+                </div>
+                
+                <div class="relative flex-1 mx-6">
+                    <div class="relative">
+                        <input type="text" placeholder="Search for groceries..." class="w-full py-2 px-4 pr-10 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <button class="absolute right-3 top-2 text-gray-500">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div id="searchResults" class="absolute z-50 mt-2 w-full bg-white rounded-lg shadow-lg hidden">
+                        <!-- Search results will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button id="cartButton" class="relative">
+                            <i class="fas fa-shopping-cart text-2xl text-gray-700"></i>
+                            <span id="cartCount" class="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                        </button>
+                    </div>
+                    <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full font-medium transition duration-200">
+                        Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Delivery Info Banner -->
+    <div class="bg-green-50 py-2">
+        <div class="container mx-auto px-4 flex items-center justify-center">
+            <span class="delivery-time text-white px-3 py-1 rounded-full text-sm font-medium mr-2">10 min</span>
+            <span class="text-gray-700 text-sm font-medium">Delivery to: <span class="font-semibold">Connaught Place, New Delhi</span> • </span>
+            <button class="text-green-600 text-sm font-medium ml-1">Change</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Categories -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Shop by Categories</h2>
+                <button class="text-green-500 font-medium">See all</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-green-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/24910a83-faf0-4372-b450-22ef35198356.png" alt="Fruits and vegetables category icon with fresh apples and bananas" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Fruits & Vegetables</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-blue-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cf04ac38-4592-426c-bb1d-b6671d2264a5.png" alt="Dairy products category icon with milk bottle and cheese" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Dairy & Eggs</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-yellow-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/69b79dc9-8c13-47e0-aab8-818e96e04f58.png" alt="Beverages category icon with soda can and juice glass" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Beverages</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-red-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/62fc56ce-bb6b-4e72-9355-4c59de07d680.png" alt="Snacks category icon with chips packet and cookies" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Snacks</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-purple-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8b4a6d60-32af-480f-89e2-54c2f6d0a14e.png" alt="Frozen foods category icon with ice cream and frozen veggies" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Frozen Foods</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-pink-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0f2fd499-b719-4f7a-bb59-1ecd909c23c4.png" alt="Personal care category icon with shampoo and soap bottles" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Personal Care</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-indigo-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a125b812-86a9-4e5c-83ce-a32b8af76d89.png" alt="Cleaning supplies category icon with broom and detergent" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">Cleaning</span>
+                </button>
+                
+                <button class="category-chip flex flex-col items-center justify-center p-3 bg-white rounded-lg hover:shadow-md">
+                    <div class="bg-gray-100 p-3 rounded-full mb-2">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/7c1bbd40-f9dd-420f-8e2b-8327678b2685.png" alt="All categories icon with various grocery items" class="w-8 h-8">
+                    </div>
+                    <span class="text-xs font-medium text-center">View All</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Popular Products -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Popular Items</h2>
+                <button class="text-green-500 font-medium">See all</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Product Card 1 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/12b56b97-d29f-41de-8fd9-bec1a0d9a868.png" alt="Fresh bananas bunch with green stems on wooden table" class="w-full h-40 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-green-50">
+                                <i class="far fa-heart text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-medium text-gray-800">Bananas (Doz.)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">Fresho</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-gray-800">₹45</span>
+                                <span class="text-xs text-gray-500 ml-1 line-through">₹60</span>
+                                <span class="text-xs text-green-600 ml-1">25% OFF</span>
+                            </div>
+                            <button class="add-to-cart bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium transition duration-200" data-id="1" data-name="Bananas (Doz.)" data-price="45">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Card 2 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/88a4f87f-8464-4dda-862d-a2dbb316df4c.png" alt="Fresh milk bottle with condensation droplets on surface" class="w-full h-40 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-green-50">
+                                <i class="far fa-heart text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-medium text-gray-800">Amul Milk (1L)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">Amul</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-gray-800">₹56</span>
+                                <span class="text-xs text-gray-500 ml-1 line-through">₹60</span>
+                                <span class="text-xs text-green-600 ml-1">7% OFF</span>
+                            </div>
+                            <button class="add-to-cart bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium transition duration-200" data-id="2" data-name="Amul Milk (1L)" data-price="56">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Card 3 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/37ada96b-98c0-416d-b77a-12b9d192f856.png" alt="Lay's potato chips packet with colorful packaging" class="w-full h-40 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-green-50">
+                                <i class="far fa-heart text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-medium text-gray-800">Lay's Chips (70g)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">Lay's</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-gray-800">₹30</span>
+                                <span class="text-xs text-gray-500 ml-1 line-through">₹35</span>
+                                <span class="text-xs text-green-600 ml-1">14% OFF</span>
+                            </div>
+                            <button class="add-to-cart bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium transition duration-200" data-id="3" data-name="Lay's Chips (70g)" data-price="30">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Card 4 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/11d4a52f-a2da-49a8-b88c-051d8079e495.png" alt="Package of Britannia biscuits with golden color packaging" class="w-full h-40 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-green-50">
+                                <i class="far fa-heart text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-medium text-gray-800">Britannia Biscuits (200g)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">Britannia</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-gray-800">₹42</span>
+                                <span class="text-xs text-gray-500 ml-1 line-through">₹50</span>
+                                <span class="text-xs text-green-600 ml-1">16% OFF</span>
+                            </div>
+                            <button class="add-to-cart bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium transition duration-200" data-id="4" data-name="Britannia Biscuits (200g)" data-price="42">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Product Card 5 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fd429d6f-e4ae-4353-9ff3-7691901e1895.png" alt="Tropicana orange juice carton with fresh oranges on the side" class="w-full h-40 object-cover">
+                        <div class="absolute top-2 right-2">
+                            <button class="bg-white p-2 rounded-full shadow-md hover:bg-green-50">
+                                <i class="far fa-heart text-gray-500"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex justify-between items-start mb-1">
+                            <h3 class="font-medium text-gray-800">Tropicana Juice (1L)</h3>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">In Stock</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-2">Tropicana</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-gray-800">₹180</span>
+                                <span class="text-xs text-gray-500 ml-1 line-through">₹200</span>
+                                <span class="text-xs text-green-600 ml-1">10% OFF</span>
+                            </div>
+                            <button class="add-to-cart bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium transition duration-200" data-id="5" data-name="Tropicana Juice (1L)" data-price="180">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discounted Products -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Best Deals</h2>
+                <button class="text-green-500 font-medium">See all</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Deal Card 1 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden flex">
+                    <div class="w-1/3">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fa6ae44d-3f15-4186-838b-2e0350b507c0.png" alt="Basket of assorted fruits including apples, oranges, and grapes" class="w-full h-full object-cover">
+                    </div>
+                    <div class="w-2/3 p-4">
+                        <h3 class="font-bold text-gray-800 mb-1">Fruits Combo Box</h3>
+                        <p class="text-sm text-gray-500 mb-2">Seasonal fresh fruits</p>
+                        <div class="flex items-center mb-3">
+                            <span class="font-bold text-gray-800">₹249</span>
+                            <span class="text-xs text-gray-500 ml-2 line-through">₹350</span>
+                            <span class="text-xs text-green-600 ml-2 font-bold">29% OFF</span>
+                        </div>
+                        <button class="add-to-cart w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-full font-medium transition duration-200 flex items-center justify-center" data-id="6" data-name="Fruits Combo Box" data-price="249">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Deal Card 2 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden flex">
+                    <div class="w-1/3">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ec18cbd3-1501-4f70-b866-b974ce4f0484.png" alt="Assorted cleaning products including detergent, floor cleaner, and dish soap" class="w-full h-full object-cover">
+                    </div>
+                    <div class="w-2/3 p-4">
+                        <h3 class="font-bold text-gray-800 mb-1">Cleaning Essentials Kit</h3>
+                        <p class="text-sm text-gray-500 mb-2">Complete home cleaning</p>
+                        <div class="flex items-center mb-3">
+                            <span class="font-bold text-gray-800">₹399</span>
+                            <span class="text-xs text-gray-500 ml-2 line-through">₹500</span>
+                            <span class="text-xs text-green-600 ml-2 font-bold">20% OFF</span>
+                        </div>
+                        <button class="add-to-cart w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-full font-medium transition duration-200 flex items-center justify-center" data-id="7" data-name="Cleaning Essentials Kit" data-price="399">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Deal Card 3 -->
+                <div class="product-card bg-white rounded-lg overflow-hidden flex">
+                    <div class="w-1/3">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cebbb512-0767-46ee-8dc7-916707c8805b.png" alt="Snack hamper with chips, cookies, chocolates, and nuts" class="w-full h-full object-cover">
+                    </div>
+                    <div class="w-2/3 p-4">
+                        <h3 class="font-bold text-gray-800 mb-1">Snack Attack Combo</h3>
+                        <p class="text-sm text-gray-500 mb-2">Perfect for movie nights</p>
+                        <div class="flex items-center mb-3">
+                            <span class="font-bold text-gray-800">₹299</span>
+                            <span class="text-xs text-gray-500 ml-2 line-through">₹450</span>
+                            <span class="text-xs text-green-600 ml-2 font-bold">34% OFF</span>
+                        </div>
+                        <button class="add-to-cart w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-full font-medium transition duration-200 flex items-center justify-center" data-id="8" data-name="Snack Attack Combo" data-price="299">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="fixed top-0 right-0 w-full sm:w-96 h-full bg-white shadow-lg transform translate-x-full cart-sidebar z-50">
+        <div class="h-full flex flex-col">
+            <!-- Cart Header -->
+            <div class="p-4 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-700">Your Cart</h2>
+                <button id="closeCart" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div id="cartItems">
+                    <!-- Cart items will be populated here -->
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fas fa-shopping-cart text-4xl mb-3"></i>
+                        <p>Your cart is empty</p>
+                        <p class="text-sm mt-2">Add some items to get started</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cart Footer -->
+            <div class="p-4 border-t">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="font-medium text-gray-600">Subtotal:</span>
+                    <span id="cartTotal" class="font-bold text-xl">₹0</span>
+                </div>
+                <button id="checkoutBtn" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-full font-bold transition duration-200">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg lg:hidden">
+        <div class="flex justify-around items-center py-3">
+            <a href="#" class="flex flex-col items-center text-green-500">
+                <i class="fas fa-home text-xl"></i>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-gray-500">
+                <i class="fas fa-search text-xl"></i>
+                <span class="text-xs mt-1">Search</span>
+            </a>
+            <button id="cartButtonMobile" class="relative flex flex-col items-center text-gray-500">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cartCountMobile" class="absolute top-0 right-0 -mt-1 -mr-1 bg-green-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                <span class="text-xs mt-1">Cart</span>
+            </button>
+            <a href="#" class="flex flex-col items-center text-gray-500">
+                <i class="fas fa-user text-xl"></i>
+                <span class="text-xs mt-1">Account</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Cart functionality
+        let cart = [];
+        let cartTotal = 0;
+        
+        // DOM Elements
+        const cartButton = document.getElementById('cartButton');
+        const cartButtonMobile = document.getElementById('cartButtonMobile');
+        const cartSidebar = document.getElementById('cartSidebar');
+        const closeCart = document.getElementById('closeCart');
+        const cartItems = document.getElementById('cartItems');
+        const cartTotalElement = document.getElementById('cartTotal');
+        const cartCount = document.getElementById('cartCount');
+        const cartCountMobile = document.getElementById('cartCountMobile');
+        const addToCartButtons = document.querySelectorAll('.add-to-cart');
+        
+        // Toggle Cart Sidebar
+        function toggleCart() {
+            cartSidebar.classList.toggle('translate-x-full');
+            cartSidebar.classList.toggle('slide-in');
+        }
+        
+        cartButton.addEventListener('click', toggleCart);
+        cartButtonMobile.addEventListener('click', toggleCart);
+        closeCart.addEventListener('click', toggleCart);
+        
+        // Add to Cart Functionality
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-id');
+                const productName = this.getAttribute('data-name');
+                const productPrice = parseInt(this.getAttribute('data-price'));
+                
+                // Check if product already in cart
+                const existingItem = cart.find(item => item.id === productId);
+                
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({
+                        id: productId,
+                        name: productName,
+                        price: productPrice,
+                        quantity: 1
+                    });
+                }
+                
+                // Update cart total
+                cartTotal += productPrice;
+                
+                // Update UI
+                updateCartUI();
+                
+                // Add bounce animation to cart button
+                cartCount.classList.add('cart-item-added');
+                cartCountMobile.classList.add('cart-item-added');
+                
+                setTimeout(() => {
+                    cartCount.classList.remove('cart-item-added');
+                    cartCountMobile.classList.remove('cart-item-added');
+                }, 400);
+                
+                // Show added notification
+                showNotification(`${productName} added to cart`);
+            });
+        });
+        
+        // Update Cart UI
+        function updateCartUI() {
+            // Update cart count
+            const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = itemCount;
+            cartCountMobile.textContent = itemCount;
+            
+            // Update cart total
+            cartTotalElement.textContent = `₹${cartTotal}`;
+            
+            // Update cart items
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-10 text-gray-500">
+                        <i class="fas fa-shopping-cart text-4xl mb-3"></i>
+                        <p>Your cart is empty</p>
+                        <p class="text-sm mt-2">Add some items to get started</p>
+                    </div>
+                `;
+            } else {
+                let itemsHTML = '';
+                
+                cart.forEach(item => {
+                    itemsHTML += `
+                        <div class="flex justify-between items-center mb-4 pb-4 border-b">
+                            <div>
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-500">₹${item.price} x ${item.quantity}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="font-bold text-gray-800 mr-4">₹${item.price * item.quantity}</span>
+                                <button class="remove-from-cart text-red-500 hover:text-red-700" data-id="${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                cartItems.innerHTML = itemsHTML;
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-from-cart').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-id');
+                        removeFromCart(productId);
+                    });
+                });
+            }
+        }
+        
+        // Remove from Cart Functionality
+        function removeFromCart(productId) {
+            const itemIndex = cart.findIndex(item => item.id === productId);
+            
+            if (itemIndex !== -1) {
+                const item = cart[itemIndex];
+                
+                // Update cart total
+                cartTotal -= item.price * item.quantity;
+                
+                // Remove item from cart
+                cart.splice(itemIndex, 1);
+                
+                // Update UI
+                updateCartUI();
+                
+                // Show notification
+                showNotification(`${item.name} removed from cart`);
+            }
+        }
+        
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-fade-in';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('animate-fade-out');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Checkout button
+        document.getElementById('checkoutBtn').addEventListener('click', function() {
+            if (cart.length === 0) {
+                showNotification('Your cart is empty!');
+            } else {
+                showNotification('Order placed successfully!');
+                cart = [];
+                cartTotal = 0;
+                updateCartUI();
+                toggleCart();
+            }
+        });
+        
+        // Add a little animation style
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                @keyframes fade-in {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                @keyframes fade-out {
+                    from { opacity: 1; transform: translateY(0); }
+                    to { opacity: 0; transform: translateY(-10px); }
+                }
+                
+                .animate-fade-in {
+                    animation: fade-in 0.3s ease-out;
+                }
+                
+                .animate-fade-out {
+                    animation: fade-out 0.3s ease-out;
+                }
+            </style>
+        `);
+        
+        // Search functionality would be implemented here
+    </script>
+</body>
+</html>
+
